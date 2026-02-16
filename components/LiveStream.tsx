@@ -1,7 +1,9 @@
-import React from 'react';
-import { AlertCircle, Wifi } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertCircle, Wifi, Satellite, Radio, Loader2 } from 'lucide-react';
 
 const LiveStream: React.FC = () => {
+  const [isStreamLoaded, setIsStreamLoaded] = useState(false);
+
   return (
     <div className="w-full">
       <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
@@ -19,26 +21,56 @@ const LiveStream: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-full border border-slate-700">
-            <Wifi className="w-4 h-4 text-brand" />
-            <span className="text-sm font-medium text-brand">Signal Strength: Excellent</span>
+            <Wifi className={`w-4 h-4 ${isStreamLoaded ? 'text-brand' : 'text-yellow-500 animate-pulse'}`} />
+            <span className={`text-sm font-medium ${isStreamLoaded ? 'text-brand' : 'text-yellow-500'}`}>
+              {isStreamLoaded ? 'Signal Strength: Excellent' : 'Establishing Connection...'}
+            </span>
           </div>
         </div>
 
-        <div className="relative aspect-video w-full bg-black rounded-xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.6)] border border-slate-800">
-          <div className="absolute inset-0 flex items-center justify-center text-slate-500 z-0">
-            <p>Loading Stream Source...</p>
+        <div className="relative aspect-video w-full bg-black rounded-xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.6)] border border-slate-800 bg-[url('https://images.unsplash.com/photo-1531415074968-036ba1b575da?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+          
+          {/* Loading Overlay */}
+          <div 
+            className={`absolute inset-0 flex flex-col items-center justify-center z-20 transition-all duration-1000 ${isStreamLoaded ? 'opacity-0 pointer-events-none scale-110' : 'opacity-100 scale-100'}`}
+          >
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-brand/30 blur-2xl rounded-full animate-pulse"></div>
+              <div className="relative z-10 w-24 h-24 rounded-full border-2 border-slate-700 bg-slate-900/80 flex items-center justify-center shadow-2xl">
+                <Satellite className="w-10 h-10 text-brand animate-bounce" style={{ animationDuration: '3s' }} />
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
+                 <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+              </div>
+            </div>
+            
+            <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+              <Radio className="w-6 h-6 text-brand animate-pulse" />
+              Initializing Stream
+            </h3>
+            
+            <div className="flex items-center gap-3 text-slate-400 text-sm bg-slate-900/50 px-4 py-2 rounded-full border border-slate-700/50 backdrop-blur-md">
+              <Loader2 className="w-4 h-4 animate-spin text-brand" />
+              <span>Connecting to secure satellite feed...</span>
+            </div>
           </div>
+
           {/* The requested iframe */}
           <iframe 
-              src="//streamcrichd.com/cric.php" 
+              src="//streamcrichd.com/update/star.php" 
               width="100%" 
               height="100%" 
               scrolling="no" 
               frameBorder="0" 
               allowFullScreen 
               allow="encrypted-media"
-              className="relative z-10 w-full h-full"
+              className={`relative z-10 w-full h-full transition-opacity duration-1000 ${isStreamLoaded ? 'opacity-100' : 'opacity-0'}`}
               title="Live Cricket Stream"
+              onLoad={() => {
+                // Add a small delay to ensure visual smoothness
+                setTimeout(() => setIsStreamLoaded(true), 1500);
+              }}
           ></iframe>
         </div>
 
